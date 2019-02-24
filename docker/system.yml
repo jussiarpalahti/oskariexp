@@ -1,0 +1,54 @@
+
+---
+#
+# Setup Oskari components into Docker containers
+#
+
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+
+  vars:
+    project_name: "oskari"
+  
+  tasks:
+
+    - name: Build Postgres image
+      docker_image:
+        name: "{{ project_name }}_postgres"
+        state: present
+        path: "{{ playbook_dir }}"
+
+    - name: Start postgres
+      docker_container:
+        name: "{{project_name}}_pg"
+        image: "postgres"
+        state: started
+        labels:
+          project: "{{project_name}}"
+          purpose: "database"
+        # recreate: yes
+        env:
+          POSTGRES_USER: "data"
+          POSTGRES_DB: "data"
+          POSTGRES_PASSWORD: "data"
+          PGDATA: "/data"
+        keep_volumes: yes
+        networks:
+          - name: "data"
+        volumes:
+          - "{{ playbook_dir }}/data:/data"
+        published_ports: "all"
+      # register: result
+    
+    - name: Start Redis
+      docker_container:
+        name: "{{ project_name }}_redis"
+        # TODO: Is persistence required for transport?
+        command: "redis-server --appendonly yes"
+    
+    # - name: Record results with ARA
+    #   ara_record:
+    #     key: starting
+    #     value: "{{{{ result }}"
+    
