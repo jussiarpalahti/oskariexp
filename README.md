@@ -10,7 +10,7 @@ Oskari related collection place
 docker run -it --name oskari centos:centos6 /bin/bash
 yum install -y epel-release
 yum update -y
-yum install -y ansible
+yum install -y ansible unzip
 ```
 
 ### Commit
